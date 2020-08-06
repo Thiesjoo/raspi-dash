@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+</head>
+
+<body>
+  <h1>Actual Temperature: <span id="tempId"></span></h1>
+  <canvas id="chart" width="400" height="400"></canvas>
+
+
+
+  <label for="time">Choose a time period</label>
+  <select name="time" id="time" onchange="updateState()">
+    <option value="10">Past 10 temperatures</option>
+    <option value="50">Past 50 temperatures</option>
+    <option value="100">Past 100 temperatures</option>
+    <option value="1000">Past 1000 temperatures (Probably too much)</option>
+    <option value="0">All (This will probably crash the website)</option>
+  </select>
+
+
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+  integrity="sha512-s+xg36jbIujB2S2VKfpGmlC3T5V2TF3lY48DX7u2r9XzGzgPsa6wTpOQA7J9iffvdeBN0q9tKzRxVxw1JviZPg=="
+  crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io();
+  let select = document.querySelector("#time");
+  let tempLabel = document.querySelector("#tempId")
+  let maxValue = select.value;
+  let onUpdate = false;
+
+
+
+  var ctx = document.getElementById('chart').getContext('2d')
+  var data = {
+    labels: [],
+    datasets: [{
+      data: [],
+      label: 'Temperature',
+      backgroundColor: '#ff6600'
+    }]
+  }
+  var optionsAnimations = {
+    animation: true,
+    scales: {
+      yAxes: [{
+        ticks: {
+          max: 40,
+          min: 10
+        }
+      }]
+    }
+  }
+
+  let chart = new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: optionsAnimations
+  })
+
+
+
+  socket.on("update", (value) => {
+    if (Array.isArray(value)) {
+      // data.datasets[0].data = []
+      // data.labels = []
+      value.forEach((v) => {
+        add(v)
+      })
+      tempLabel.innerHTML = `${value[value.length - 1].temp}°C`
+
+    } else if (onUpdate) {
+      handleUpdate(value)
+    }
+
+  })
+
+  socket.on("change", (value) => handleUpdate(value))
+
+  function handleUpdate(value) {
+    add(value)
+    tempLabel.innerHTML = `${value.temp}°C`
+  }
+
+  function add(value, update = true) {
+    var length = data.labels.length
+    if (length >= maxValue && maxValue !== "0") {
+      data.datasets[0].data.shift()
+      data.labels.shift()
+    }
+
+    let d = new Date(value.time)
+    var hr = pad(d.getHours());
+    var min = pad(d.getMinutes());
+    let sec = pad(d.getSeconds())
+
+
+    data.labels.push(`${hr}:${min}:${sec}`)
+    data.datasets[0].data.push(value.temp)
+
+    if (chart && update) chart.update()
+  }
+
+
+  function updateState() {
+    maxValue = select.value;
+    socket.emit("get", maxValue)
+  }
+
+  function pad(val) {
+    if (val < 10) {
+      val = "0" + val;
+    }
+    return val
+  }
+
+  updateState()
+</script>
+
+</html>
