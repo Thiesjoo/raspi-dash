@@ -69,12 +69,12 @@
 
   socket.on("update", (value) => {
     if (Array.isArray(value)) {
-      // data.datasets[0].data = []
-      // data.labels = []
+      data.datasets[0].data = []
+      data.labels = []
       value.forEach((v) => {
         add(v)
       })
-      tempLabel.innerHTML = `${value[value.length - 1].temp}°C`
+      if(value.length > 0) tempLabel.innerHTML = `${value[0].temp}°C`
 
     } else if (onUpdate) {
       handleUpdate(value)

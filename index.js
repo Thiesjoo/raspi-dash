@@ -9,27 +9,17 @@ var Datastore = require('nedb-promises')
   , db = Datastore.create('db/sensors.db');
 
 
-const interval = 1; //Seconds
-let lastTemp = 0;
+require("./services")(app)
+
 
 app.use(function (err, req, res, next) {
-  res.status(400).send('You fucking broke something')
+  console.error("ERROR WAS THROWN: ", err)
+  res.status(500).send('Internal server error')
 })
 
-
-app.get('/', (req, res, next) => {
-  try {
-    let path = __dirname + '/public/index.html';
-    if (fs.existsSync(path)) {
-      res.sendFile(path)
-    } else {
-      next("File not found")
-    }
-  } catch (err) {
-    next(error)
-  }
-});
-
+//TEMP
+const interval = 1; //Seconds
+let lastTemp = 0;
 app.get("/all", async (req, res, next) => {
   try {
     res.json(await db.find({}))
@@ -78,6 +68,8 @@ setInterval(async () => {
     throw new Error(err)
   }
 }, interval * 1000)
+
+// /temp
 
 http.listen(3000, () => {
   console.log('listening on *:3000');

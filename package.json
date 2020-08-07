@@ -6,6 +6,7 @@
   "dependencies": {
     "ds18b20-raspi": "^0.3.4",
     "express": "^4.17.1",
+    "express-async-handler": "^1.1.4",
     "nedb-promises": "^4.0.4",
     "socket.io": "^2.3.0"
   },
