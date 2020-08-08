@@ -1,23 +1,25 @@
-const app = require('express')();
+const express =  require('express');
+const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-const fs = require("fs")
 
 const sensor = require('ds18b20-raspi');
 
-var Datastore = require('nedb-promises')
-  , db = Datastore.create('db/sensors.db');
+app.use(express.json())
 
 
-require("./services")(app)
-
+const services = require("./services")(app)
+const databaseService = services.database;
+databaseService.init(app);
 
 app.use(function (err, req, res, next) {
-  console.error("ERROR WAS THROWN: ", err)
-  res.status(500).send('Internal server error')
+  console.error(err)
+  res.status(err.status).send({msg: err.message})
 })
 
 //TEMP
+let db = null;
+
 const interval = 1; //Seconds
 let lastTemp = 0;
 app.get("/all", async (req, res, next) => {
@@ -27,9 +29,9 @@ app.get("/all", async (req, res, next) => {
     next(err)
   }
 })
-app.get("/delete", async (req,res, next) => {
+app.get("/delete", async (req, res, next) => {
   try {
-    res.json(await db.remove({},{ multi: true },))
+    res.json(await db.remove({}, { multi: true },))
   } catch (err) {
     next(err)
   }
@@ -71,6 +73,10 @@ setInterval(async () => {
 
 // /temp
 
-http.listen(3000, () => {
-  console.log('listening on *:3000');
+app.on("ready", () => {
+  //TODO: Remove this
+  db = databaseService.getMongoDB()
+  http.listen(3000, () => {
+    console.log('listening on *:3000');
+  });
 });
