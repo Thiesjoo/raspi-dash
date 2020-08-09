@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const ash = require("express-async-handler")
-const { body, param } = require('express-validator');
+const { body, param, check } = require('express-validator');
 
 const { errorHandler, config } = require("../../helper")
 
@@ -26,7 +26,8 @@ router.post('/devices', [
         .custom(id => checkId(id, false)),
     body("label").isLength({ min: 3 }),
     body("gateway").isIP(),
-    body("type").custom(checkType)
+    check("type.type", "A device type is required").custom(checkType),
+    check("type.unit").isString(),
 ], errorHandler, ash(async function (req, res) {
 
     res.json(await db.createDevice(req))
@@ -48,35 +49,24 @@ router.get('/devices/:id', [
     res.send(device)
 }));
 
-
-
-
-
-
-
-
-router.put('/devices/:id', [
-    body("id")
-        .custom(id => checkId(id, true)),
+router.put(['/devices/', "/devices/:id"], [
     body("label").isLength({ min: 3 }),
     body("gateway").isIP(),
-    body("type").custom(type => {
-        if (!type) throw new Error("Not a valid type")
-        return true
-    })
+    check("type.type", "A device type is required").custom(checkType),
+    check("type.unit").isString(),
 ], errorHandler, ash(async function (req, res) {
-    // Update or create an existing device
-    res.send('About device');
+    let id = req.params.id || req.body.id;
+    await checkId(id, true)
+    // FIXME: or create an existing device
+    res.json(await db.updateDevice(id, req))
 }));
 
 router.delete('/devices/:id', [
     param("id")
         .custom(id => checkId(id, true)),
-
 ], errorHandler, ash(async function (req, res) {
-    console.log(req.params.id)
-    // Delete an existing device
-    res.json({ "yaee": "test" });
+    await db.deleteDevice(req.params.id)
+    res.json({ok: true});
 }));
 
 

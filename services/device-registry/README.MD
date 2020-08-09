@@ -35,7 +35,7 @@ Subsequent response definitions will only detail the expected value of the `data
     {
         "id": "floor-lamp",
         "label": "Floor Lamp",
-        "type": {"type": "sensor", "unit": "C"},
+        "type": {"type": "sensor", "unit": "C"}, //Can also contain: min/max, 
         "gateway": "192.1.68.0.2"
     },
 ]
