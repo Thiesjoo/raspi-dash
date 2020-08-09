@@ -1,8 +1,17 @@
-module.exports = function (app) {
+module.exports = async function (app) {
+    try {
 
-    app.use('/api/registry', require("./device-registry"))
-    app.use('/', require("./web-server"))
+        const database = await require("./database").init()
+
+        app.use('/api/registry', await require("./device-registry")(database))
+        // app.use('/', require("./web-server"))
 
 
-    return { database: require("./database") }
+        // return {}
+        app.emit("ready")
+
+    } catch (error) {
+       console.error("Couldn't initialize services",error)
+       process.exit()
+    }
 }

@@ -1,20 +1,63 @@
 const router = require('express').Router();
 const ash = require("express-async-handler")
-const { body, validationResult } = require('express-validator');
+const { body, param } = require('express-validator');
 
-const { getDevice } = require("../database")
+const { errorHandler, config } = require("../../helper")
 
-const internal = require("../../devices/raspi-sensors/internal")
-const errorHandler = require("../../helper").errorHandler
+let internal, db;
+
+const checkId = async (id, yes) => {
+    let device = await db.getDevice(id)
+    if (device) {
+        return yes ? true : Promise.reject("Device id is already in use")
+    }
+    return yes ? Promise.reject("Device not found") : true
+}
+
+const checkType = (type) => {
+    if (config.types.includes(type)) return true;
+    throw new Error("Not a valid type")
+}
+
+
 
 router.post('/devices', [
-    body("id").isUUID()
-    // .custom(id => {
-    //     return getDevice(id).then(device => {
-    //         if (device) return Promise.reject("Device id already in use")
-    //     })
-    // })
-    ,
+    body("id")
+        .custom(id => checkId(id, false)),
+    body("label").isLength({ min: 3 }),
+    body("gateway").isIP(),
+    body("type").custom(checkType)
+], errorHandler, ash(async function (req, res) {
+
+    res.json(await db.createDevice(req))
+}));
+
+router.get('/devices', ash(async function (req, res) {
+
+    res.send(await db.getDevices())
+}));
+
+router.get('/devices/:id', [
+    param("id").isString()
+], errorHandler, ash(async function (req, res) {
+
+    let id = req.params.id;
+
+    let device = await db.getDevice(id);
+    if (!device) throw new Error("Device not found")
+    res.send(device)
+}));
+
+
+
+
+
+
+
+
+router.put('/devices/:id', [
+    body("id")
+        .custom(id => checkId(id, true)),
     body("label").isLength({ min: 3 }),
     body("gateway").isIP(),
     body("type").custom(type => {
@@ -22,43 +65,24 @@ router.post('/devices', [
         return true
     })
 ], errorHandler, ash(async function (req, res) {
-    console.log("handling request")
-
-    let { id, label, gateway, type } = req.body;
-
-    res.send("TODO")
-}));
-
-router.get('/devices', ash(async function (req, res) {
-    // Read device
-
-    res.send(await internal.getCPUTemp());
-}));
-
-router.get('/devices/:id', [
-    body("id").isString()
-], errorHandler, ash(async function (req, res) {
-    let id = req.params.id;
-
-    // Read device
-    console.log("wtf", req.params)
-
-    res.send(await getDevice());
-}));
-
-// 28-0215011c09ff
-
-router.put('/devices/:id', ash(async function (req, res) {
     // Update or create an existing device
     res.send('About device');
 }));
 
-router.delete('/devices/:id', ash(async function (req, res) {
+router.delete('/devices/:id', [
+    param("id")
+        .custom(id => checkId(id, true)),
+
+], errorHandler, ash(async function (req, res) {
     console.log(req.params.id)
     // Delete an existing device
-    res.json({"yaee": "test"});
+    res.json({ "yaee": "test" });
 }));
 
 
 
-module.exports = router;
+module.exports = async function (con) {
+    internal = await require("./internal")(con)
+    db = internal.database
+    return router
+};

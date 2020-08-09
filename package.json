@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "ds18b20-raspi": "^0.3.4",
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "express-validator": "^6.6.1",
     "http-errors": "^1.8.0",
+    "mongodb": "^3.6.0",
     "nedb-promises": "^4.0.4",
     "socket.io": "^2.3.0"
   },

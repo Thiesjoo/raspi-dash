@@ -1,3 +1,4 @@
+
 // function execShellCommand(cmd) {
 //     const exec = require('child_process').exec;
 //     return new Promise((resolve, reject) => {
@@ -26,7 +27,11 @@ const errorHandler = (req,res,next) => {
     next()
 }
 
+
+
+
 module.exports = {
     execShellCommand,
-    errorHandler
+    errorHandler,
+    config: require("./config")
 }
