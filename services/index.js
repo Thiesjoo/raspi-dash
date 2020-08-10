@@ -7,7 +7,6 @@ module.exports = async function (app) {
         // app.use('/', require("./web-server"))
 
 
-        // return {}
         app.emit("ready")
 
     } catch (error) {

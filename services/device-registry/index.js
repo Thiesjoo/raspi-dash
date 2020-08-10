@@ -2,24 +2,17 @@ const router = require('express').Router();
 const ash = require("express-async-handler")
 const { body, param, check } = require('express-validator');
 
-const { errorHandler, config } = require("../../helper")
+const { errorHandler } = require("../../helper");
+const { checkIdWithoutDB, checkType } = require('./internal_helper');
 
-let internal, db;
+let db;
 
-const checkId = async (id, yes) => {
-    let device = await db.getDevice(id)
-    if (device) {
-        return yes ? true : Promise.reject("Device id is already in use")
-    }
-    return yes ? Promise.reject("Device not found") : true
-}
-
-const checkType = (type) => {
-    if (config.types.includes(type)) return true;
-    throw new Error("Not a valid type")
-}
+const checkId = (id, yes) => { return checkIdWithoutDB(db, id, yes) }
 
 
+router.get('/devices', ash(async function (req, res) {
+    res.send(await db.getDevices())
+}));
 
 router.post('/devices', [
     body("id")
@@ -30,18 +23,14 @@ router.post('/devices', [
     check("type.unit").isString(),
 ], errorHandler, ash(async function (req, res) {
 
-    res.json(await db.createDevice(req))
+    res.status(201).json(await db.createDevice(req))
 }));
 
-router.get('/devices', ash(async function (req, res) {
 
-    res.send(await db.getDevices())
-}));
-
-router.get('/devices/:id', [
-    param("id").isString()
+router.get("/devices/:id", [
+    param("id")
+        .custom(id => checkId(id, true)),
 ], errorHandler, ash(async function (req, res) {
-
     let id = req.params.id;
 
     let device = await db.getDevice(id);
@@ -49,30 +38,37 @@ router.get('/devices/:id', [
     res.send(device)
 }));
 
-router.put(['/devices/', "/devices/:id"], [
+router.put("/devices/:id", [
+    body("id").isEmpty(), // Cannot reassign ID;
     body("label").isLength({ min: 3 }),
     body("gateway").isIP(),
     check("type.type", "A device type is required").custom(checkType),
     check("type.unit").isString(),
 ], errorHandler, ash(async function (req, res) {
-    let id = req.params.id || req.body.id;
-    await checkId(id, true)
-    // FIXME: or create an existing device
-    res.json(await db.updateDevice(id, req))
+    let id = req.params.id
+    let device = await db.getDevice(id);
+    if (device) {
+        res.json(await db.updateDevice(id, req));
+    } else {
+        req.body.id = id;
+        res.status(201).json({ data: await db.createDevice(req) })
+    }
 }));
 
-router.delete('/devices/:id', [
-    param("id")
-        .custom(id => checkId(id, true)),
+router.delete(['/devices/', "/devices/:id"], [
+
 ], errorHandler, ash(async function (req, res) {
-    await db.deleteDevice(req.params.id)
-    res.json({ok: true});
+    let id = req.params.id || req.body.id;
+    await checkId(id, true)
+
+
+    await db.deleteDevice(id)
+    res.status(204).json({ ok: true });
 }));
 
 
 
 module.exports = async function (con) {
-    internal = await require("./internal")(con)
-    db = internal.database
+    db = await require("./internal_db")(con)
     return router
 };

@@ -21,9 +21,8 @@ async function deleteDevice(id) {
 }
 
 async function updateDevice(id, req) {
-    let result = await db.updateOne({ id }, { $set: { ...{id, label, gateway, type} = req.body } })
-    //TODO: Return new object
-    return {}
+    let result = await db.findOneAndUpdate({ id }, { $set: { ...{id, label, gateway, type} = req.body } });
+    return result.value
 }
 
 
@@ -32,13 +31,10 @@ module.exports = async function (database) {
     db = await database.collection("device-registry");
 
     return {
-        database: {
             getDevices,
             getDevice,
             createDevice,
             deleteDevice,
             updateDevice
-        },
-
     }
 }

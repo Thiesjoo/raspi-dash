@@ -7,17 +7,14 @@ All responses will have the form
 ```json
 {
     "data": "Mixed type holding the content of the response",
-    "message": "Description of what happened"
 }
 ```
 
 Subsequent response definitions will only detail the expected value of the `data field`
 
-## Types
+Every error will be a 400 status code. It will contain a array of error in the `errors field`. It has several property's to help you find the error
 
-* Sensor
-* Switch
-
+## Routes
 
 
 ### List all devices
@@ -45,7 +42,7 @@ Subsequent response definitions will only detail the expected value of the `data
 
 **Definition**
 
-`POST /devices`
+`POST /registry/devices`
 
 **Arguments**
 
@@ -70,15 +67,36 @@ If a device with the given identifier already exists, an error will be thrown
 ```
 
 
+## Specific devices
+
+
+### Lookup device details
+
+`GET /registry/devices/<identifier>`
+
+**Response**
+
+- `404 Not Found` if the device does not exist
+- `200 OK` on success
+
+```json
+{
+    "identifier": "floor-lamp",
+    "name": "Floor Lamp",
+    "device_type": "switch",
+    "controller_gateway": "192.1.68.0.2"
+}
+```
+
+
 ### Updating a device
 
 **Definition**
 
-`POST /devices`
+`PUT /registry/devices/<identifier>`
 
 **Arguments**
 
-- `"id":string` a globally unique identifier for this device
 - `"label":string` a friendly name for this device
 - `"type":object` the type of the device as understood by the client
 - `"gateway":string` the IP address of the device's controller
@@ -97,26 +115,7 @@ If a device with the given identifier already exists, an error will be thrown
 ```
 
 
-
-## Lookup device details
-
-`GET /registry/devices/<identifier>`
-
-**Response**
-
-- `404 Not Found` if the device does not exist
-- `200 OK` on success
-
-```json
-{
-    "identifier": "floor-lamp",
-    "name": "Floor Lamp",
-    "device_type": "switch",
-    "controller_gateway": "192.1.68.0.2"
-}
-```
-
-## Delete a device
+### Delete a device
 
 **Definition**
 
