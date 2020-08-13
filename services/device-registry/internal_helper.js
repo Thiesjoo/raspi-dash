@@ -1,3 +1,5 @@
+const config = require("../../config")
+
 const checkIdWithoutDB = async (db, id, yes) => {
     if (!id ) return Promise.reject("No id specified")
     let device = await db.getDevice(id)

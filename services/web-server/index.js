@@ -1,17 +1,6 @@
-const fs = require('fs')
-const router = require('express').Router();
+const express = require('express')
+const router = express.Router();
 
-router.get('/', (req, res, next) => {
-  try {
-    let path = process.cwd() + '/public/index.html';
-    if (fs.existsSync(path)) {
-      res.sendFile(path)
-    } else {
-      next("File not found")
-    }
-  } catch (err) {
-    next(err)
-  }
-});
+router.use(express.static('public'))
 
 module.exports = router;

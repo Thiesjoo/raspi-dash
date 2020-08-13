@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+    <style type="text/css" media="screen">
+        #editor {
+            width: 500px;
+            height: 200px;
+        }
+
+        #app {
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="has-background-dark">
+        <section class="section">
+            <div class="container">
+                <h1 class="title has-text-primary">
+                    Api tester for raspi-dash
+                </h1>
+                <p class="subtitle has-text-info">
+                    My first api with <strong class="has-text-success">realtime data</strong>!
+                </p>
+            </div>
+            <hr>
+            <p class="has-text-white">
+                <!-- Status -->
+            <div class="tags has-addons">
+                <span class="tag is-black">Socket:</span>
+                <span class="tag is-light" id="status_socket">Unknown</span>
+            </div>
+            <!-- <div class="tags has-addons">
+                <span class="tag is-black" > Database</span>
+                <span class="tag is-light" id="status_db">Unknown</span>
+            </div>
+            <div class="tags has-addons">
+                <span class="tag is-black" >Api</span>
+                <span class="tag is-light" id="status_api">Unknown</span>
+            </div> -->
+            <div class="tags has-addons">
+                <span class="tag is-black"> Logged in:</span>
+                <span class="tag is-light" id="status_loggedin">Unknown</span>
+            </div>
+            </p>
+            <hr>
+            <div class="container">
+                <form id="socket_form">
+                    <!-- Socketio tester -->
+                    <div class="field">
+                        <label class="label has-text-info">Channel name</label>
+                        <div class="control">
+                            <input id="socket_channel" class="input has-background-info-dark has-text-white" type="text"
+                                value="data">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label has-text-info">Message</label>
+                        <div class="control">
+                            <div id="editor">
+                                {
+                                "data": "testing"
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="button" class="button is-primary" onclick="formatEditor()">Format JSON</button>
+                        </div>
+                        <div class="control">
+                            <button  class="button is-link">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <p class="content has-text-success" id="socket_result">Result from your request will go here.</p>
+
+        </section>
+    </div>
+</body>
+<!-- The JSON editor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js"
+    integrity="sha512-GoORoNnxst42zE3rYPj4bNBm0Q6ZRXKNH2D9nEmNvVF/z24ywVnijAWVi/09iBiVDQVf3UlZHpzhAJIdd9BXqw=="
+    crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-beautify.min.js" integrity="sha512-QfDSPBb1bUxUj/XQP0UNmQLsHy5LMKOzk9IAuUYGJebOFrfYi5csZsrUaPbgrsppiKY3kPv+zGe/kaS6yUcmHg==" crossorigin="anonymous"></script>
+<script>
+    var editor = ace.edit("editor");
+    ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/')
+    editor.setTheme("ace/theme/cobalt");
+    editor.session.setMode("ace/mode/json");
+    editor.session.setTabSize(2);
+
+    var beautify = ace.require("ace/ext/beautify"); // get reference to extension
+
+    formatEditor()
+    function formatEditor() {
+        beautify.beautify(editor.session)
+    }
+</script>
+
+<!-- Socket stuff -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- App -->
+<script src="/scripts/app.js"></script>
+
+
+</html>

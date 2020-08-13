@@ -35,7 +35,7 @@ router.get("/devices/:id", [
 
     let device = await db.getDevice(id);
     if (!device) throw new Error("Device not found")
-    res.send(device)
+    res.json(device)
 }));
 
 router.put("/devices/:id", [

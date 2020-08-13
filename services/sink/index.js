@@ -1,34 +1,46 @@
-const router = require('express').Router();
-const ash = require("express-async-handler")
-
-const internal = require("../../devices/raspi-sensors/internal")
-
-router.post('/sink', function(req, res) {
-    let id; // Sensor id,
-    //check id 
-
-    //post data to database
-    res.send("post")
-});
-
-router.get('/', ash(async function(req, res) {
-    // Read device
-
-    res.send(await internal.getCPUTemp());
-}));
-
-// 28-0215011c09ff
-
-router.put('/', function(req, res) {
-    // Update an existing device
-    res.send('About device');
-});
-
-router.delete('/', function(req, res) {
-    // Delete an existing device
-    res.send('About device');
-});
+module.exports = function (db, http) {
+    const io = require("socket.io")(http)
+    let cache = {}; // Store last insert, last inserted value for each sensor
 
 
+    io.on('connection', (socket) => {
+        //Set online in database
+        console.log('a user connected');
 
-module.exports = router;
+        socket.on("init", (data, ack) => {
+            if (data.id && socket.id) {
+                let found = Object.entries(cache).find(x=> x[1].id == data.id);
+                if (found) {
+                    delete cache[found[0]]
+                    console.log("ID ALREADY USED")
+                }
+                //check data.id in database
+                cache[socket.id] = { id: data.id, online: true, lastMessage: "", lastTime: Date.now() - 3600 };
+                console.log(cache)
+                ack(true)
+            } else {
+                console.error("Someone is hacking us!")
+                ack(false)
+            }
+        })
+
+        socket.on("data", (data, ack) => {
+            if (cache[socket.id]) {
+                cache[socket.id].lastMessage = data
+                cache[socket.id].lastTime = Date.now()
+
+                console.log("Received", data, "from ", socket.id)
+                ack(true)
+            } else {
+                ack(false)
+            }
+        })
+
+        socket.on('disconnect', () => {
+            console.log('user disconnected');
+        });
+
+
+    });
+
+};

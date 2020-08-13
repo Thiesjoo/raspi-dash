@@ -49,3 +49,7 @@ Once a day has passed:
         ]
     }
 ```
+
+
+## How to ingest data
+You connect to the socket at the same port the api is hosted.
