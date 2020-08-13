@@ -4,6 +4,7 @@ const socket = io();
 const socket_form = document.querySelector("#socket_form")
 const socket_channel = document.querySelector("#socket_channel")
 const socket_result = document.querySelector("#socket_result")
+const socket_progress = document.querySelector("#socket_progress")
 
 socket_form.addEventListener("submit", (e) => {
     e.preventDefault()
@@ -18,9 +19,14 @@ socket_form.addEventListener("submit", (e) => {
     }
 
     console.log(`Sending message to channel ${channel} with data`, parsed,)
+    socket_result.innerHTML = "Result: pending"
+    socket_progress.style.display = "block"
+
     socket.emit(channel, parsed, (data) => {
         console.log("Received ack for data: ", data)
         socket_result.innerHTML = "Result: " + data
+        socket_progress.style.display = "none"
+
     })
 })
 
