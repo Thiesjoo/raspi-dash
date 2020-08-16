@@ -10,8 +10,8 @@ async function getDevice(id) {
 }
 
 async function createDevice(req) {
-    let standard = { status: "offline", "lastSeen": Date.now() }
-    let result = await db.insertOne({ id, label, gateway, type, standard } = req.body,)
+    //TODO: Store precision, 
+    let result = await db.insertOne({ id, label, gateway, type } = req.body,)
     return result.ops[0]
 }
 

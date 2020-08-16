@@ -68,9 +68,9 @@
                             <div class="control">
                                 <div id="editor">
                                     {
-                                    "data": "testing"
-                                    }
-
+                                        "data": "testing",
+                                        "time": "{{now}}"
+                                        }
                                 </div>
                             </div>
                         </div>
@@ -106,13 +106,13 @@
     integrity="sha512-QfDSPBb1bUxUj/XQP0UNmQLsHy5LMKOzk9IAuUYGJebOFrfYi5csZsrUaPbgrsppiKY3kPv+zGe/kaS6yUcmHg=="
     crossorigin="anonymous"></script>
 <script>
-    var editor = ace.edit("editor");
+    const editor = ace.edit("editor");
     ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/')
     editor.setTheme("ace/theme/cobalt");
     editor.session.setMode("ace/mode/json");
     editor.session.setTabSize(2);
 
-    var beautify = ace.require("ace/ext/beautify"); // get reference to extension
+    const beautify = ace.require("ace/ext/beautify"); // get reference to extension
 
     formatEditor()
     function formatEditor() {

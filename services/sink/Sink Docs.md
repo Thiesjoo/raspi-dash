@@ -1,10 +1,18 @@
 # Sink service
 
-## TEMP Sensor types
-- GPS Store where user has been
-- Store bandwidth used. Wifi and 4g
-- 
 
+
+## Types
+
+* Sensor
+    - Data must be provided like this:
+    ```json
+    {
+        "time": 1597522021969,
+        "value": <numerical value of data>, 
+    }
+    ``` 
+    - Next time
 
 ## Time data precision
 *For most sensors*
@@ -20,8 +28,8 @@ Every sensor gets it's own mongodb collection
 Once a day has passed: 
 - *Check if an archive is there*
 - Gather all data from this day,
-- Calculate hourly average's (Or add all value's together)
-- Calculate max and min of this day (If specified in device registry)
+- Gather device data from dev-reg
+- Get method of aggregating the data
 
 - Make a new archive object with data
 
@@ -44,7 +52,7 @@ Once a day has passed:
         "timeEnd": "<start time> + 3600", // An hour of data,
         "precision": "60",
         "samples": [
-            {"val": "50,3", "time":1535530412 }
+            {"value": "50,3", "time":1535530412 }
             // List of maximum 1440 samples. (24*60)
         ]
     }

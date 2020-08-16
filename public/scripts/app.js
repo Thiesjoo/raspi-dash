@@ -1,5 +1,5 @@
 const socket = io();
-
+let testValue
 // Socket sending
 const socket_form = document.querySelector("#socket_form")
 const socket_channel = document.querySelector("#socket_channel")
@@ -8,7 +8,15 @@ const socket_progress = document.querySelector("#socket_progress")
 
 socket_form.addEventListener("submit", (e) => {
     e.preventDefault()
-    const unparsedJson = editor.getSession().getValue();
+    let unparsedJson = editor.getSession().getValue();
+
+    // Helper functions
+    unparsedJson = unparsedJson.replace(/\"\{\{(\w+)\}\}\"/g, function (match, group) {
+        switch (group) {
+            case "now":
+                return Date.now()
+        }
+    });
     const channel = socket_channel.value;
     let parsed = {};
     try {

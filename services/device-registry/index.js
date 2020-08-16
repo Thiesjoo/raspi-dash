@@ -69,6 +69,6 @@ router.delete(['/devices/', "/devices/:id"], [
 
 
 module.exports = async function (con) {
-    db = await require("./internal_db")(con)
+    db = await require("../database/device-registry-db")(con)
     return router
 };

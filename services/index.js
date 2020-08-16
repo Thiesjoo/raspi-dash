@@ -3,7 +3,7 @@ module.exports = async function (app, http) {
 
         const database = await require("./database").init()
 
-        require("./sink")(database, http)
+        await require("./sink")(database, http)
 
         app.use('/api/registry', await require("./device-registry")(database))
         app.use('/', require("./web-server"))
