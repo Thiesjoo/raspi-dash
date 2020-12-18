@@ -1,6 +1,8 @@
 # Raspi-dash
 ### *Made by Thies Nieborg*
 
+This will be an app to monitor sensors all a round the house.
+Base code is currently updated, was working on the first device.
 
 ## Folder structure
 All web services are in `./services`
